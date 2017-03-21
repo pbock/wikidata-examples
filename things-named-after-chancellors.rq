@@ -1,0 +1,52 @@
+# Gets a list of all things named after German chancellors,
+# sorted by their sequence in office.
+
+SELECT ?chancellorLabel ?itemLabel (MIN(?startDate) as ?date) {
+  # Get every chancellor of Germany
+  ?chancellor wdt:P39 wd:Q4970706.
+
+  # Then get all the "position held" statements for them. We want them
+  # so we can find out when they first became chancellor.
+  # The p: prefix selects a property description (subject verb object)
+  # rather than the subject/object itself.
+  ?chancellor p:P39 ?chancellorP.
+
+  # Many people held different offices before they were chancellors,
+  # we're not interested in those, we want the year of the first
+  # term as chancellor.
+  # This reduces the set to triples that describe chancellors.
+  # The ps: prefix sort of reverses the p: prefix from above –
+  # it selects the thing being described by the description.
+  ?chancellorP ps:P39 wd:Q4970706.
+
+  # Now that we've thrown out everything we're not interested in,
+  # we select the "start time" qualifier of the ?chancellorP
+  # relationship we selected earlier – a description of the description
+  # (confused yet?)
+  # You can see what this means when you look at the Wikidata page for
+  # e.g. Angela Merkel (https://www.wikidata.org/wiki/Q567): The
+  # "position held" statements describe what office she holds,
+  # but they're accompanied by statements that describe when she held it,
+  # whom she replaced and so on.
+  # The pq: prefix lets us target a specific qualifier value.
+  ?chancellorP pq:P580 ?startDate.
+
+  # And finally the easy bit: Selecting the thing that's named after
+  # the chancellor.
+  ?item wdt:P138 ?chancellor.
+
+  # And label the things. Because most items will be German, it makes
+  # sense to use that as the primary language, but some chancellors'
+  # fame transcedes national borders, so not everything named after
+  # them has a German label assigned in Wikidata.
+  # Adding English and French fallbacks should cover everything.
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "de,en,fr".
+  }
+}
+# Note that many chancellors spent more than one term in office.
+# The SELECT block above will select all of them, so we're grouping them
+# all together here and use the MIN(…) function in the SELECT statement
+# at the top to reduce all the grouped children to the earliest item
+GROUP BY ?chancellorLabel ?itemLabel
+ORDER BY ?date
