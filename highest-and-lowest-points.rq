@@ -1,0 +1,73 @@
+# Get a table of countries' highest and lowest points, with names,
+# geo-coordinates and elevations as well as a photo of the highest point.
+
+SELECT
+  ?countryLabel
+  ?highestPointLabel ?highestPointElev ?highestPointLocation
+  (MIN(?highestPointPhoto) AS ?highestPointPhoto) # is MIN the best choice here?
+  ?deepestPointLabel ?deepestPointElev ?deepestPointLocation
+{
+  # Get everything that is an instance of (wdt:P31) country (wd:Q6256)
+  ?country wdt:P31 wd:Q6256.
+
+  # We're making this optional because we want to know if
+  # the highest point for a country is missing
+  OPTIONAL {
+    # Get the relations that describe this country's highest point(s), …
+    ?country p:P610 ?highestPointRelation. # Note p: prefix
+    # … then get the thing that this relation points to – the highest
+    # point itself. We need this for its name and coordinates
+    # and possibly to look up its elevation.
+    ?highestPointRelation ps:P610 ?highestPoint. # Note ps: prefix
+
+    # Take the highest point from the "elevation …" qualifier of the
+    # "highest point" statement if possible …
+    OPTIONAL { ?highestPointRelation pq:P2044 ?highestPointElev. } # Note pq:
+    # … and if that doesn't exist, look up the "highest point" statement
+    # value on the highest point item directly.
+    OPTIONAL { ?highestPoint wdt:P2044 ?highestPointElev. }
+    # I'm not sure if this is the best way to try several potential sources
+    # one after the other, but it seem to work and the first OPTIONAL
+    # block takes precedence.
+
+    # If they're known, look up the coordinates of the ?highestPoint object
+    OPTIONAL { ?highestPoint wdt:P625 ?highestPointLocation. }
+
+    # And see if we can get a photo too, for good measure.
+    OPTIONAL { ?highestPoint wdt:P18 ?highestPointPhoto. }
+  }
+
+  # And the same logic for the deepest point
+  OPTIONAL {
+    ?country p:P1589 ?deepestPointRelation.
+    ?deepestPointRelation ps:P1589 ?deepestPoint.
+
+    # The "elevation" qualifier seems to be set a lot more often for the
+    # deepest point than for the highest. Maybe because the deepest
+    # point is often an ocean where the concept of
+    # "elevation above sea level" doesn't really make sense?
+    OPTIONAL { ?deepestPointRelation pq:P2044 ?deepestPointElev. }
+    OPTIONAL { ?deepestPoint wdt:P2044 ?deepestPointElev. }
+
+    OPTIONAL { ?deepestPoint wdt:P625 ?deepestPointLocation. }
+
+    # Photos often don't make sense for the deepest point and can
+    # even be confusing, because oceans and rivers
+    # (e.g., the lowest point of Liechtenstein is the river Rhine, but
+    # its photo shows Loreley hundreds of kilometres downstream in Germany).
+    # We could probably filter this out, but let's not bother.
+  }
+
+  # We could probably add more languages for fewer missing labels.
+  # Is there an elegant way to fall back to the native label if an English
+  # one does not exist?
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "en".
+  }
+}
+# Is this really how to prevent multiple photos from generating
+# otherwise duplicate rows?!
+GROUP BY
+  ?countryLabel
+  ?highestPointLabel ?highestPointElev ?highestPointLocation
+  ?deepestPointLabel ?deepestPointElev ?deepestPointLocation
