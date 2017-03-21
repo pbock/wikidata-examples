@@ -3,7 +3,10 @@
 
 # (To use the COUNT() function, we need to group the results later on,
 # which we're going to do by gender)
-SELECT ?genderLabel (COUNT(?item) as ?total) (COUNT(?death) as ?dead) {
+# I'm not sure how the COUNT(?death) statement behaves for people who
+# have several dates of death listed (which is a possibility, e.g. if
+# the dates are contested) – let's ignore that problem here.
+SELECT ?genderLabel (COUNT(?thing) as ?total) (COUNT(?death) as ?dead) {
   # Select all things (?thing)
   # that are named after (wdt:P138) somebody (?nameGiver).
   ?thing wdt:P138 ?nameGiver.
