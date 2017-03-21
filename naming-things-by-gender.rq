@@ -1,0 +1,40 @@
+# Get counts of how many things are named after people by gender
+# and by whether or not they're dead.
+
+# (To use the COUNT() function, we need to group the results later on,
+# which we're going to do by gender)
+SELECT ?genderLabel (COUNT(?item) as ?total) (COUNT(?death) as ?dead) {
+  # Select all things (?thing)
+  # that are named after (wdt:P138) somebody (?nameGiver).
+  ?thing wdt:P138 ?nameGiver.
+
+  # Narrow our results down to things who have a gender statement and
+  # get the value of that gender statement in ?gender.
+  # (In doing this, we're excluding most non-human items from our
+  # results, as well as humans whose gender is unknown or missing.)
+  ?nameGiver wdt:P21 ?gender.
+
+  # If a death date is known, get that too.
+  # If we didn't use OPTIONAL {} here, we would reject all living people.
+  OPTIONAL { ?nameGiver wdt:P570 ?death. }
+
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "en".
+  }
+}
+# We're not interested in the items themselves, just how many there are,
+# so we'll aggregate them by gender.
+GROUP BY ?genderLabel
+
+# Result:
+# |---------------------+-------+--------|
+# |  genderLabel        | total | dead   |
+# |---------------------+-------+--------|
+# |  male               | 45002 | 40874  |
+# |  female             | 7638  | 5199   |
+# |  male organism      | 27    | 5      |
+# |  female organism    | 13    | 2      |
+# |  hermaphrodite      | 1     | 0      |
+# |  transgender female | 2     | 1      |
+# |---------------------+-------+--------|
+# If you want something named after you, be male and dead.
