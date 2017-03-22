@@ -11,6 +11,7 @@ The main target audience for these snippets is my future self, but maybe you fin
 - [Most things are named after dead men](naming-things-by-gender.rq)
 - [Countries' highest and lowest points](highest-and-lowest-points.rq)
 - [Heads of government who were born in a different country](heads-of-government-countries.rq)
+- [A dictionary of Chemical elements](chemical-elements-dictionary.rq)
 
 
 ## Licence

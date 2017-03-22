@@ -1,0 +1,16 @@
+# Get the names of all chemical elements in all available languages,
+# along with chemical symbol and atomic number.
+# (One language-element pair per row.)
+
+SELECT ?symbol ?atomicNumber ?language ?name
+WHERE {
+  ?element wdt:P31 wd:Q11344;
+           wdt:P246 ?symbol;
+           wdt:P1086 ?atomicNumber.
+  # Access the label directly; this allows us to get its language as well.
+	OPTIONAL {
+    ?element rdfs:label ?name.
+    BIND(LANG(?name) as ?language)
+  }
+}
+ORDER BY ASC(?atomicNumber) ASC(?language)
