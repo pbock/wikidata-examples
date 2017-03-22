@@ -1,0 +1,40 @@
+# Get heads of government who were born in a different country
+
+# MIN together with the GROUP BY clause prevents multiple pictures
+# for a person from creating duplicate rows.
+SELECT ?countryLabel ?countryOfBirthLabel ?headOfGovernmentLabel
+  (MIN(?picture) AS ?picture)
+WHERE {
+  # ?country is an instance of country and
+  # its head of government is ?headOfGovernment
+  ?country wdt:P31 wd:Q6256;
+           wdt:P6 ?headOfGovernment.
+
+  # ?headOfGovernment was born in (place) which is in ?countryOfBirth
+  # Note that this step filters out heads of government whose
+  # place of birth is unknown or missing.
+  # Note also that this (usually) finds the country in which
+  # the place of birth lies today, which is not necessarily the same
+  # as the country in which the person was born (countries and
+  # borders change). There are several other possible approaches here.
+  ?headOfGovernment wdt:P19/wdt:P17 ?countryOfBirth.
+
+  # Only include matches where the country whose head of government
+  # the person is is not the one where they were born.
+  FILTER(?country != ?countryOfBirth)
+
+  # And why not get a picture of them if we can? It's always nice to
+  # be able to show faces.
+  OPTIONAL { ?headOfGovernment wdt:P18 ?picture. }
+
+  # And label everything in English please.
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" }
+}
+# Group by everything that "has the right" to create a separate row
+GROUP BY ?countryLabel ?countryOfBirthLabel ?headOfGovernmentLabel
+
+# Mark Rutte incorrectly appears in the output
+# because he is head of the Netherlands (Q55)
+# but was born in the Kingdom of the Netherlands (Q29999).
+# This is annoying and I'm not sure of the best way to fix it –
+# probably in Wikidata itself, but how?
