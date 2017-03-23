@@ -8,7 +8,7 @@ WHERE {
            wdt:P246 ?symbol;
            wdt:P1086 ?atomicNumber.
   # Access the label directly; this allows us to get its language as well.
-	OPTIONAL {
+  OPTIONAL {
     ?element rdfs:label ?name.
     BIND(LANG(?name) as ?language)
   }
