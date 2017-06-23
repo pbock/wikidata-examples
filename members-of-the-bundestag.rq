@@ -1,0 +1,24 @@
+# This query currently selects very few rows (3).
+# This is on purpose to demonstrate either that the data is incomplete
+# or that the query is formally correct and plausible,
+# but queries the wrong thing.
+
+SELECT ?person ?personLabel ?parliamentaryTermLabel
+WHERE {
+  # Select all people who are members (wdt:P39) of the German Bundestag (wd:Q…)
+  ?person wdt:P39 wd:Q1939555.
+  # We need to inspect their individual "position held" statements.
+  # The p: prefix returns *all* matching statements for the given person.
+  ?person p:P39 ?positionHeld.
+  # For someone like Angela Merkel, that can be quite a lot of statements,
+  # not all of them relating to the Bundestag. Let's throw them out!
+  # The ps: prefix gives us the *value* of the statements we just selected,
+  # and by passing wd:Q1939555 (member of the German Bundestag), we can
+  # throw out all the statements that don't interest us.
+  ?positionHeld ps:P39 wd:Q1939555.
+  # Finally, we want to know in which term they served. This is modelled as
+  # a qualifier on the "position held" statement, which we can select
+  # with the pq: prefix.
+  ?positionHeld pq:P2937 ?parliamentaryTerm.
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "de,en". }
+}
