@@ -1,7 +1,4 @@
-# This query currently selects very few rows (3).
-# This is on purpose to demonstrate either that the data is incomplete
-# or that the query is formally correct and plausible,
-# but queries the wrong thing.
+# Who was in the German Bundestag and during which term?
 
 SELECT ?person ?personLabel ?parliamentaryTermLabel
 WHERE {
