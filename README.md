@@ -13,6 +13,7 @@ The main target audience for these snippets is my future self, but maybe you fin
 - [Heads of government who were born in a different country](heads-of-government-countries.rq)
 - [A dictionary of Chemical elements](chemical-elements-dictionary.rq)
 - [Members of the German Bundestag and the terms they served](members-of-the-bundestag.rq)
+- [A list of country flags and their colors](flag-colors.rq)
 
 
 ## Licence

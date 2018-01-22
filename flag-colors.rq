@@ -1,0 +1,28 @@
+# Gets a list of country flags with their colors (separated by
+# pipes: |), their aspect ratio, and a graphic representation
+
+SELECT
+  ?countryName
+  ?flagName
+  ?aspectRatioName
+  (GROUP_CONCAT(?colorName; separator='|') AS ?colors)
+  (MIN(?image) AS ?image)
+WHERE {
+  ?country wdt:P163 ?flag;
+           wdt:P31 wd:Q6256.
+  OPTIONAL { ?flag wdt:P462 ?color. }
+  OPTIONAL { ?flag wdt:P18 ?image. }
+  OPTIONAL { ?flag wdt:P2061 ?aspectRatio. }
+
+  # The color names won't make it into the GROUP_CONCAT with their
+  # auto-assigned variable names for some reason, so we'll
+  # have to assign them manually.
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "en".
+    ?country rdfs:label ?countryName.
+    ?flag rdfs:label ?flagName.
+    ?color rdfs:label ?colorName.
+    ?aspectRatio rdfs:label ?aspectRatioName.
+  }
+}
+GROUP BY ?countryName ?flagName ?aspectRatioName
