@@ -1,0 +1,28 @@
+# Beetle families with images and common names in English, German, French and Norwegian
+# Queried for a silly Twitter joke: https://twitter.com/bockph/status/1280796787335401472
+
+SELECT ?beetle ?beetleLabel (SAMPLE(?image) AS ?image) ?en ?de ?fr ?nb
+WHERE 
+{
+  ?beetle wdt:P171+ wd:Q22671;
+          wdt:P105 wd:Q35409;
+          wdt:P18 ?image.
+  OPTIONAL {
+    ?beetle wdt:P1843 ?en.
+    FILTER(LANG(?en) = "en").
+  }
+  OPTIONAL {
+    ?beetle wdt:P1843 ?de.
+    FILTER(LANG(?de) = "de").
+  }
+  OPTIONAL {
+    ?beetle wdt:P1843 ?fr.
+    FILTER(LANG(?fr) = "fr").
+  }
+  OPTIONAL {
+    ?beetle wdt:P1843 ?nb.
+    FILTER(LANG(?nb) = "nb").
+  }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+}
+GROUP BY ?beetle ?beetleLabel ?en ?de ?fr ?nb
